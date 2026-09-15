@@ -1,4 +1,5 @@
 #include <iostream>
+#include <limits>
 
 struct SystemStats
 {
@@ -11,6 +12,7 @@ struct SystemStats
 
 double getCpuUsage(){
     double usage{};
+    std::cout << "Enter CPU usage: ";
     while (true) {
         std::cin >> usage;
 
@@ -34,6 +36,7 @@ double getCpuUsage(){
 
 double getMemUsage(){
     double memory{};
+    std::cout << "Enter memory usage: " << "\n";
     while (true) {
         std::cin >> memory;
 
@@ -56,6 +59,7 @@ double getMemUsage(){
 
 int getNumProcesses(){
     int processes{};
+    std::cout << "Enter number of processes: ";
     while (true) {
         std::cin >> processes;
 
@@ -118,7 +122,6 @@ void checkWarnings(const SystemStats& stats)
 }
 
 void runMonitoringCycle(){
-    std::cout << "Enter system stats: ";
     //keeping system state local
     SystemStats stats{collectSystemStats()};
 
@@ -127,18 +130,37 @@ void runMonitoringCycle(){
 
 }
 
-int main(){
-    bool continueMonitoring{true};
-
-    do{
-        runMonitoringCycle();
+bool shouldContinueMonitoring(){
+    while (true) {
         std::cout << "Would you like to continue monitoring? (y/n) ?: ";
+
         char ans{};
         std::cin >> ans;
 
-        if (ans == 'n') {
-            continueMonitoring = false;
+        if (!std::cin || !(ans == 'y' || ans == 'n')) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid input. Please enter y or n.\n";
+            continue;
+        }
+         if (ans == 'n') {
+            return false;
         }
 
-    } while(continueMonitoring);
+        return true;
+
+    }
+
+}
+
+int main(){
+
+    while (true)
+    {
+        runMonitoringCycle();
+
+        if (!shouldContinueMonitoring())
+            break;
+    }
+    return 0;
 }

@@ -119,6 +119,7 @@ void checkWarnings(const SystemStats& stats)
 
 void runMonitoringCycle(){
     std::cout << "Enter system stats: ";
+    //keeping system state local
     SystemStats stats{collectSystemStats()};
 
     displayStats(stats);

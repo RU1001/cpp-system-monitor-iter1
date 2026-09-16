@@ -1,3 +1,4 @@
 # Build artifacts
 main
 *.dSYM/
+monitor_log.txt

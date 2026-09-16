@@ -1,5 +1,7 @@
 #include <iostream>
 #include <limits>
+#include <fstream>
+#include <chrono>
 
 struct SystemStats
 {
@@ -7,6 +9,12 @@ struct SystemStats
     double memUsage{};
     int numProcesses{};
 
+};
+
+struct MonitorConfig
+{
+    const double cpuUsageWarningThreshold{80.0};
+    const double memUsageWarningThreshold{80.0};
 };
 
 
@@ -36,7 +44,7 @@ double getCpuUsage(){
 
 double getMemUsage(){
     double memory{};
-    std::cout << "Enter memory usage: " << "\n";
+    std::cout << "Enter memory usage: ";
     while (true) {
         std::cin >> memory;
 
@@ -97,19 +105,31 @@ void displayStats(const SystemStats& stats)
     std::cout << "============================\n";
 }
 
-void checkWarnings(const SystemStats& stats)
+void displayConfig(const MonitorConfig& config){
+    std::cout << "\n============================\n";
+    std::cout << "       MONITOR SETTINGS\n";
+    std::cout << "============================\n";
+
+    std::cout << "CPU Warning:      " << config.cpuUsageWarningThreshold << "%\n";
+    std::cout << "Memory Warning:   " << config.memUsageWarningThreshold << "%\n";
+
+    std::cout << "============================\n";
+
+
+}
+
+void checkWarnings(const SystemStats& stats, const MonitorConfig& config)
 {
-    const double cpuUsageWarningThreshold{80.0};
-    const double memUsageWarningThreshold{80.0};
+
     bool warningFound{};
 
-    if (stats.cpuUsage >= cpuUsageWarningThreshold)
+    if (stats.cpuUsage >= config.cpuUsageWarningThreshold)
     {
         std::cout << "WARNING: High CPU usage!\n";
         warningFound = true;
     }
   
-    if (stats.memUsage >= memUsageWarningThreshold)
+    if (stats.memUsage >= config.memUsageWarningThreshold)
     {
         std::cout << "WARNING: High memory usage!\n";
         warningFound = true;
@@ -121,12 +141,42 @@ void checkWarnings(const SystemStats& stats)
 
 }
 
-void runMonitoringCycle(){
+void logStats(const SystemStats& stats){
+    std::string filename = "monitor_log.txt";
+    std::ofstream file(filename, std::ios::app);
+
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file." << std::endl;
+        return;
+    }
+
+    auto t = std::chrono::system_clock::now();
+    auto tme = std::chrono::system_clock::to_time_t(t);
+    file << "Time:            " << std::ctime(&tme);
+    file << "CPU Usage:      " << stats.cpuUsage << "%\n";
+    file << "Memory Usage:   " << stats.memUsage << "%\n";
+    file << "Processes:      " << stats.numProcesses << '\n';
+
+    if(!file){
+        std::cerr << "Failed to write to file." << std:: endl;
+        return;
+    }
+
+   
+    file.close(); //not really needed because ofstream destroys after usage
+
+}
+
+void runMonitoringCycle(const MonitorConfig& config){
     //keeping system state local
-    SystemStats stats{collectSystemStats()};
+    SystemStats stats{collectSystemStats()}; //goes away after function ends
 
     displayStats(stats);
-    checkWarnings(stats);
+    displayConfig(config);
+    checkWarnings(stats,config);
+    logStats(stats);
+
+
 
 }
 
@@ -153,11 +203,14 @@ bool shouldContinueMonitoring(){
 
 }
 
+
 int main(){
+
+    const MonitorConfig c{};
 
     while (true)
     {
-        runMonitoringCycle();
+        runMonitoringCycle(c);
 
         if (!shouldContinueMonitoring())
             break;

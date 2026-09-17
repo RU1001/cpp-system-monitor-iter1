@@ -2,14 +2,10 @@
 #include <limits>
 #include <fstream>
 #include <chrono>
+#include "display.h"
+#include "SystemStats.h"
 
-struct SystemStats
-{
-    double cpuUsage{};
-    double memUsage{};
-    int numProcesses{};
 
-};
 
 struct MonitorConfig
 {
@@ -92,18 +88,8 @@ SystemStats collectSystemStats(){
 
 }
 
-void displayStats(const SystemStats& stats)
-{
-    std::cout << "\n============================\n";
-    std::cout << "       SYSTEM MONITOR\n";
-    std::cout << "============================\n";
 
-    std::cout << "CPU Usage:      " << stats.cpuUsage << "%\n";
-    std::cout << "Memory Usage:   " << stats.memUsage << "%\n";
-    std::cout << "Processes:      " << stats.numProcesses << '\n';
 
-    std::cout << "============================\n";
-}
 
 void displayConfig(const MonitorConfig& config){
     std::cout << "\n============================\n";
@@ -171,7 +157,7 @@ void runMonitoringCycle(const MonitorConfig& config){
     //keeping system state local
     SystemStats stats{collectSystemStats()}; //goes away after function ends
 
-    displayStats(stats);
+    Monitor::displayStats(stats);
     displayConfig(config);
     checkWarnings(stats,config);
     logStats(stats);

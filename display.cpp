@@ -30,6 +30,23 @@ namespace Display {
 
     }
 
+    void displayProcess(const Process& proc){
+        if (proc.state == ProcessState::Running)
+        {
+            std::cout << "Running";
+            
+        }
+        else
+        {
+            std::cout << "Stopped";
+        }
+
+        std::cout << proc.processID << " ";
+        std::cout << proc.name << " ";
+        std::cout << proc.cpuUsage << " ";
+        std::cout << proc.memUsage << '\n';
+    }
+
 
 
 }
